@@ -1,6 +1,6 @@
 # Diagrammes UML – Conception du Projet
 
-**Projet :** Plateforme Web Vitrine & Catalogue E-Commerce (Honey Group)  
+**Projet :** Plateforme de Réservation en Ligne & Gestion de Flotte (Tourisme & Transport)  
 **Auteur :** ANJARANIAINA IDEALIPITIA Andry Andraina Lucas  
 
 ---
@@ -9,43 +9,43 @@
 
 ```mermaid
 usecaseDiagram
-    actor "Visiteur (Anonyme)" as Visitor
-    actor "Client (Authentifié)" as Client
-    actor "Administrateur" as Admin
+    actor "Touriste / Visiteur" as Visitor
+    actor "Client Authentifié" as Client
+    actor "Gestionnaire / Admin" as Admin
 
-    package "Plateforme Confection Textile" {
-        usecase "Consulter la vitrine & le catalogue" as UC_Catalog
-        usecase "Filtrer & Rechercher des vêtements" as UC_Filter
-        usecase "Créer un compte / Se connecter" as UC_Auth
-        usecase "Soumettre un devis sur-mesure" as UC_Quote
-        usecase "Passer une commande" as UC_Order
-        usecase "Gérer le catalogue (CRUD)" as UC_Manage_Products
-        usecase "Traiter les devis clients" as UC_Manage_Quotes
-        usecase "Suivre l'état des commandes" as UC_Manage_Orders
+    package "Plateforme Tourisme & Gestion de Flotte" {
+        usecase "Consulter les véhicules & circuits" as UC_Search
+        usecase "S'authentifier" as UC_Auth
+        usecase "Réserver un véhicule / circuit" as UC_Book
+        usecase "Consulter mes réservations" as UC_MyBookings
+        usecase "Gérer le parc de véhicules (CRUD)" as UC_Manage_Fleet
+        usecase "Traiter & Valider les réservations" as UC_Manage_Bookings
+        usecase "Affecter les chauffeurs" as UC_Assign_Driver
+        usecase "Suivre la maintenance des véhicules" as UC_Maintenance
     }
 
-    Visitor --> UC_Catalog
-    Visitor --> UC_Filter
+    Visitor --> UC_Search
     Visitor --> UC_Auth
 
     Client --|> Visitor
-    Client --> UC_Quote
-    Client --> UC_Order
+    Client --> UC_Book
+    Client --> UC_MyBookings
 
-    Admin --> UC_Manage_Products
-    Admin --> UC_Manage_Quotes
-    Admin --> UC_Manage_Orders
+    Admin --> UC_Manage_Fleet
+    Admin --> UC_Manage_Bookings
+    Admin --> UC_Assign_Driver
+    Admin --> UC_Maintenance
 ```
 
 ---
 
-## 2. Diagramme de Classes / Modèle Conceptuel de Données (MCD)
+## 2. Diagramme de Classes (MCD)
 
 ```mermaid
 classDiagram
     class User {
         +String id
-        +String name
+        +String fullName
         +String email
         +String passwordHash
         +Role role
@@ -53,48 +53,46 @@ classDiagram
         +login()
     }
 
-    class Category {
+    class Vehicle {
         +String id
-        +String name
-        +String slug
+        +String registrationNumber
+        +String brand
+        +String model
+        +Category category
+        +Int capacity
+        +Float pricePerDay
+        +VehicleStatus status
     }
 
-    class Product {
+    class Reservation {
         +String id
-        +String name
+        +String clientId
+        +String vehicleId
+        +String driverId
+        +Date startDate
+        +Date endDate
+        +Float totalPrice
+        +ReservationStatus status
+        +createReservation()
+    }
+
+    class MaintenanceLog {
+        +String id
+        +String vehicleId
         +String description
-        +Float price
-        +String categoryId
-        +String imageUrl
-        +List~String~ sizes
-        +Int stock
+        +Float cost
+        +Date maintenanceDate
     }
 
-    class QuoteRequest {
-        +String id
-        +String clientId
-        +String textileDetails
-        +Int quantity
-        +Status status
-        +submitQuote()
-    }
-
-    class Order {
-        +String id
-        +String clientId
-        +Float totalAmount
-        +Status status
-        +createOrder()
-    }
-
-    Category "1" -- "*" Product : contient
-    User "1" -- "*" QuoteRequest : soumet
-    User "1" -- "*" Order : passe
+    User "1" -- "*" Reservation : effectue (Client)
+    User "1" -- "*" Reservation : conduit (Driver)
+    Vehicle "1" -- "*" Reservation : est réservé
+    Vehicle "1" -- "*" MaintenanceLog : subit
 ```
 
 ---
 
-## 3. Diagramme de Séquence (Soumission d'une demande de devis sur-mesure)
+## 3. Diagramme de Séquence (Effectuer une Réservation de Véhicule)
 
 ```mermaid
 sequenceDiagram
@@ -104,12 +102,13 @@ sequenceDiagram
     participant Backend as Backend (Express API)
     participant Database as Base de Données
 
-    Client->>Frontend: Remplit le formulaire de devis sur-mesure
-    Frontend->>Frontend: Validation locale des champs
-    Frontend->>Backend: POST /api/quotes (avec Token JWT + Données)
-    Backend->>Backend: Vérification du Token & Autorisation
-    Backend->>Database: INSERT INTO quote_requests
-    Database-->>Backend: Confirmation d'enregistrement
-    Backend-->>Frontend: Réponse HTTP 201 Created (Devis enregistré)
-    Frontend-->>Client: Message de confirmation à l'écran
+    Client->>Frontend: Sélectionne un véhicule, dates et options
+    Frontend->>Frontend: Vérification locale du formulaire
+    Frontend->>Backend: POST /api/reservations (JWT + Détails)
+    Backend->>Database: Vérifier disponibilité du véhicule pour les dates
+    Database-->>Backend: Véhicule disponible
+    Backend->>Database: INSERT INTO reservations (Status = PENDING)
+    Database-->>Backend: Confirmation insertion
+    Backend-->>Frontend: HTTP 201 Created (Réservation enregistrée)
+    Frontend-->>Client: Notification de confirmation & récapitulatif
 ```

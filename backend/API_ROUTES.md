@@ -1,47 +1,28 @@
-# Spécification des Endpoints API REST (Express.js)
+# Contrat de l'API REST (Express.js)
 
-**Base URL :** `http://localhost:5000/api` (ou port configuré dans `.env`)
-
----
-
-## 1. Authentification & Utilisateurs (`/api/auth`)
-
-| Méthode | Route | Description | Accès | Body Requis |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Inscription d'un nouveau client | Public | `{ name, email, password }` |
-| `POST` | `/api/auth/login` | Connexion et génération du Token JWT | Public | `{ email, password }` |
-| `GET` | `/api/auth/me` | Récupérer le profil de l'utilisateur connecté | Authentifié | Header: `Authorization: Bearer <token>` |
+**Projet :** API Plateforme Réservation & Gestion de Flotte  
 
 ---
 
-## 2. Catalogue & Produits (`/api/products`)
+## 1. Authentification (`/api/auth`)
+* `POST /api/auth/register` : Créer un compte client
+* `POST /api/auth/login` : Connexion et génération du Token JWT
+* `GET /api/auth/me` : Obtenir le profil de l'utilisateur connecté
 
-| Méthode | Route | Description | Accès | Query / Body |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/products` | Récupérer tous les vêtements (avec filtres) | Public | Params: `?category=...&search=...` |
-| `GET` | `/api/products/:id` | Obtenir les détails d'un vêtement précis | Public | - |
-| `POST` | `/api/products` | Ajouter un nouveau produit au catalogue | Admin | `{ name, description, price, category_id, imageUrl, sizes, stock }` |
-| `PUT` | `/api/products/:id` | Modifier un produit existant | Admin | `{ name, price, stock, ... }` |
-| `DELETE`| `/api/products/:id` | Supprimer un produit du catalogue | Admin | - |
+## 2. Flotte & Véhicules (`/api/vehicles`)
+* `GET /api/vehicles` : Obtenir la liste des véhicules (avec filtres : dates, catégorie, capacité)
+* `GET /api/vehicles/:id` : Obtenir les détails d'un véhicule
+* `POST /api/vehicles` *(Admin)* : Ajouter un nouveau véhicule
+* `PUT /api/vehicles/:id` *(Admin)* : Modifier un véhicule
+* `DELETE /api/vehicles/:id` *(Admin)* : Supprimer/Désactiver un véhicule
 
----
+## 3. Réservations (`/api/reservations`)
+* `POST /api/reservations` *(Client)* : Créer une demande de réservation
+* `GET /api/reservations/my-reservations` *(Client)* : Historique des réservations du client
+* `GET /api/reservations` *(Admin)* : Liste globale de toutes les réservations
+* `PUT /api/reservations/:id/status` *(Admin)* : Mettre à jour l'état (Valider, Annuler, Terminer)
+* `PUT /api/reservations/:id/assign-driver` *(Admin)* : Assigner un chauffeur à une réservation
 
-## 3. Demandes de Devis Sur-Mesure (`/api/quotes`)
-
-| Méthode | Route | Description | Accès | Body Requis |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/quotes` | Soumettre une demande de devis sur-mesure | Client | `{ textileDetails, quantity }` |
-| `GET` | `/api/quotes/my-quotes` | Voir ses propres demandes de devis | Client | - |
-| `GET` | `/api/quotes` | Lister toutes les demandes reçues | Admin | - |
-| `PATCH` | `/api/quotes/:id/status` | Valider ou refuser un devis | Admin | `{ status: "APPROVED" \| "REJECTED" }` |
-
----
-
-## 4. Commandes (`/api/orders`)
-
-| Méthode | Route | Description | Accès | Body Requis |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/orders` | Enregistrer une nouvelle commande | Client | `{ items: [{ productId, quantity }], totalAmount }` |
-| `GET` | `/api/orders/my-orders` | Consulter l'historique de ses commandes | Client | - |
-| `GET` | `/api/orders` | Voir l'ensemble des commandes clients | Admin | - |
-| `PATCH` | `/api/orders/:id/status` | Changer le statut de la commande | Admin | `{ status: "IN_PRODUCTION" \| "DELIVERED" }` |
+## 4. Maintenance (`/api/maintenance`) *(Admin)*
+* `GET /api/maintenance/:vehicleId` : Historique des maintenances d'un véhicule
+* `POST /api/maintenance` : Programmer ou enregistrer une maintenance
