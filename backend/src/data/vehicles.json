@@ -1,0 +1,24 @@
+[
+  {
+    "id": "v1",
+    "registration_number": "1234-TAB",
+    "brand": "Toyota",
+    "model": "Prado 4x4",
+    "category": "4x4",
+    "capacity": 7,
+    "price_per_day": 150000,
+    "status": "AVAILABLE",
+    "image_url": "/images/prado.jpg"
+  },
+  {
+    "id": "v2",
+    "registration_number": "5678-TAC",
+    "brand": "Hyundai",
+    "model": "H1 Minibus",
+    "category": "MINIBUS",
+    "capacity": 12,
+    "price_per_day": 200000,
+    "status": "AVAILABLE",
+    "image_url": "/images/h1.jpg"
+  }
+]

@@ -10,3 +10,7 @@ router.get("/items", getItems);
 router.post("/webhooks/test", receiveWebhook);
 
 export default router;
+import vehicleRoutes from "./vehicleRoutes";
+
+// Ajouter cette ligne sous vos autres routes
+router.use("/vehicles", vehicleRoutes);
